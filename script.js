@@ -414,13 +414,13 @@ function update() {
 
     frames += 1
     if (player.health == 0) {
-        player.opactiy = 0
-        boxes = []
-        bullets = []
-        zombies = []
-        player.health = 100
-        score = 0
         setTimeout(() => {
+            player.opactiy = 0
+            boxes = []
+            bullets = []
+            zombies = []
+            player.health = 100
+            score = 0
             game.active = false
         }, 500);
     }
