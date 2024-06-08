@@ -10,7 +10,7 @@ const groundLevel = canvas.height - 80;
 var time = 0;
 let score = 0
 
-game = { active: false }
+game = {active: false}
 
 //Initializing Player
 const player = {
@@ -48,7 +48,8 @@ document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 document.addEventListener('mousemove', handleMouseMove);
 document.addEventListener('mousedown', handleMouseDown);
-
+    
+//Player Movement
 function handleKeyDown(event) {
     if (!game.active) return
     switch (event.code) {
@@ -64,6 +65,7 @@ function handleKeyDown(event) {
             player.speed = 7;
             break;
     }
+    //Player shot some bullets
     if (event.code == "Space") {
         const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
         bullets.push({
@@ -99,7 +101,7 @@ function handleMouseDown(event) {
     if ((boxes.length < 5) && !((mouseX + tempBox.width > player.x) && (mouseX - tempBox.width < player.x))) {
         boxes.push({ x: mouseX, y: mouseY, level: 0, health: 100 });
     }
-    //Adding Bullets
+    //Player shot some bullets
     else {
         const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
         bullets.push({
@@ -136,14 +138,13 @@ function homeScreen() {
     ctx.fillText("you fend off the zombies. Then last as long as you can while trying to get", 640, 500)
     ctx.fillText("the highest score.", 640, 525)
 
+    //If Play Button Clicked
     document.addEventListener("mousedown", function () {
         if (100 < mouseX && mouseX < canvas.width - 200 && 600 < mouseY && mouseY < 700) {
             game.active = true
-        }
         return
+        }
     });
-
-
 }
 
 //Draw Player and Gun
@@ -172,6 +173,7 @@ function drawPlayer() {
     ctx.fillStyle = "red"
     ctx.fillRect(player.x - player.width / 2 + player.width / 100 * player.health, player.y - player.height / 2 - 20, player.width / 100 * (100 - player.health), 5)
 
+    //Player Dosen't go out of map
     if (player.x < 30) {
         player.x = 30;
     }
@@ -203,7 +205,7 @@ function drawBullets() {
 //Draw Boxes
 function drawBoxes() {
     if (!game.active) return
-    //Color changing acc to position
+    //Check if box can be placed and change color accordingly
     if (boxes.length < 5) {
         ctx.fillStyle = "rgb(0, 255, 0, 0.7)";
         ctx.fillRect(mouseX - tempBox.width / 2, mouseY - tempBox.height / 2, tempBox.width, tempBox.height);
@@ -214,6 +216,7 @@ function drawBoxes() {
         }
     }
 
+    //Boxes are placed
     boxes.forEach((box, index) => {
         box.y += tempBox.speed
 
@@ -221,29 +224,24 @@ function drawBoxes() {
         if (box.y > groundLevel - tempBox.height) {
             box.y = groundLevel - tempBox.height + 30;
         }
-
         //Collision between boxes and boxes
         for (let i = 0; i < index; i++) {
             //If box on top of boxes[i] wala box
             let count = []
             if (box.x - tempBox.width < boxes[i].x && boxes[i].x < box.x + tempBox.width) {
-                // console.log(index, "on top of", i);
                 count.push(i)
                 box.level = boxes[count[count.length - 1]].level + 1;
-
-                //If box touching lower boxes[i] set Y
+                //If box touching lower boxes[i]
                 if (box.y > boxes[count[count.length - 1]].y - tempBox.height) {
                     box.y = boxes[count[count.length - 1]].y - tempBox.height;
                 }
             }
         }
-        //Draw the final box
 
+        //Draw the final box
         boxImg = new Image();
         boxImg.src = "assets/box.jpg"
         ctx.drawImage(boxImg, box.x - tempBox.width / 2, box.y, tempBox.width, tempBox.height)
-        // ctx.fillStyle = "blue"
-        // ctx.fillRect(box.x - tempBox.width / 2, box.y, tempBox.width, tempBox.height);
 
         //Draw Box Health Bar
         ctx.fillStyle = "rgb(0, 255, 0)"
@@ -257,15 +255,18 @@ function drawBoxes() {
 function drawZombies() {
     if (!game.active) return
     ctx.fillStyle = "red"
+
     zombies.forEach((zombie) => {
         zombie.x += zombie.speed
-
+        
+        //Zombie goes towards player
         if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) {
             zombie.speed = - zombie.speed
         }
         else if (zombie.speed < 0 && zombie.x + zombie.width / 2 < player.x) {
             zombie.speed = - zombie.speed
         }
+
         ctx.fillRect(zombie.x, zombie.y, zombie.width, zombie.height)
 
         //Draw Zombie Health Bar
@@ -289,23 +290,19 @@ function collisionMechanics() {
     boxes.forEach((box) => {
         //4 direction ko alag alag karna padega
         if (distance(player.x, player.y, box.x, box.y + tempBox.height / 2) < (player.height + tempBox.height) * 0.707) {
-            //Player on top edge 
-            // 0 < box.y - player.y - player.height/2 &&      
+            //Player on top edge      
             if (player.y < box.y && box.y - player.y - player.height / 2 < 1 && box.x - tempBox.width / 2 - player.width / 2 < player.x && player.x < box.x + tempBox.width / 2 + player.width / 2) {
                 player.y = box.y - player.width / 2
                 verticalSpeed = 0
             }
-
             //Player on right edge
             if (player.x > box.x && player.x - player.width / 2 - tempBox.width / 2 - box.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2) {
                 player.x = box.x + tempBox.width
             }
-
             //Player on left edge
             if (player.x < box.x && box.x - tempBox.width / 2 - player.width / 2 - player.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2) {
                 player.x = box.x - tempBox.width;
             }
-
             // //Player on bottom edge
             if (player.y - player.height / 2 - tempBox.y - tempBox.height < 1 && box.x - tempBox.width / 2 - player.width / 2 < player.x && player.x < box.x + tempBox.width / 2 + player.width / 2) {
                 player.y = box.y + tempBox.height + player.height / 2
@@ -320,8 +317,6 @@ function collisionMechanics() {
                 bullets.splice(index, 1)
             }
         })
-
-
     })
 
     //Between Box and Zombie
@@ -376,6 +371,7 @@ function update() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    //Score
     ctx.font = "20px Arial"
     ctx.fillStyle = "white"
     ctx.fillText("Score: ", 20, 30)
@@ -391,6 +387,8 @@ function update() {
         player.y = groundLevel;
         player.verticalSpeed = 0;
     }
+
+    //Spawn Zombies after Boxes Placed
     if (boxes.length >= 5) {
         drawBullets();
         if (frames % 300 == 0) {
@@ -406,6 +404,8 @@ function update() {
             zombies.push(zombie)
         }
     }
+
+    //Run all Functions
     collisionMechanics();
     drawBoxes();
     drawPlayer();
@@ -413,17 +413,19 @@ function update() {
     homeScreen();
 
     frames += 1
+
+    //Lose Condition
     if (player.health == 0) {
+        player.opactiy = 0
+        boxes = []
+        bullets = []
+        zombies = []
+        player.health = 100
+        score = 0
         setTimeout(() => {
-            player.opactiy = 0
-            boxes = []
-            bullets = []
-            zombies = []
-            player.health = 100
-            score = 0
             game.active = false
-        }, 500);
-    }
+            }, 500);
+            }
     requestAnimationFrame(update);
 }
 update();
