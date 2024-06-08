@@ -129,7 +129,7 @@ function homeScreen() {
     ctx.strokeStyle = "white"
     ctx.strokeRect(100, 600, canvas.width - 200, 90)
     ctx.fillText("Play", 680, 665)
-    ctx.font = "40px Ariel"
+    ctx.font = "40px Ariel" 
     ctx.fillText("Instructions:", 640, 250)
     ctx.font = "20px Ariel"
     ctx.fillText("W - Jump", 700, 300)
@@ -140,8 +140,8 @@ function homeScreen() {
     ctx.fillText("You have 100 health. Zombies have 30 health. Boxes have 150 health.", 640, 450)
     ctx.fillText("Zombies do 10 damage to player and boxes. Bullets do 10 damage to", 640, 475)
     ctx.fillText("zombies. Place 5 boxes (when green) stratigically across the map to help ", 640, 500)
-    ctx.fillText("you fend off the zombies. Then last as long as you can while trying to get", 640, 525)
-    ctx.fillText("the highest score.", 640, 550)
+    ctx.fillText("you fend off the zombies. Be careful, don't stand on a box for too long.", 640, 525)
+    ctx.fillText("Best of Luck, Soldier", 640, 550)
     ctx.fillText("Made with ❤️ by Aditya", 630, canvas.height-15)
 
     //If Play Button Clicked
