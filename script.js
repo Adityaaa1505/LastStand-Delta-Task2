@@ -154,7 +154,6 @@ function drawPlayer() {
     ctx.save();
     ctx.translate(player.x, player.y);
     ctx.fillStyle = 'orange';
-    // ctx.globalAlpha = player.opacity
     ctx.fillRect(-player.width / 2, -player.height / 2, player.width, player.height);
 
     //Drawing Gun
@@ -173,12 +172,22 @@ function drawPlayer() {
     ctx.fillStyle = "red"
     ctx.fillRect(player.x - player.width / 2 + player.width / 100 * player.health, player.y - player.height / 2 - 20, player.width / 100 * (100 - player.health), 5)
 
+    // Update player position
+    player.x += player.speed;
+    player.verticalSpeed += gravity; //Gravity to Player's Vertical Speed
+    player.y = Math.max(player.y + player.verticalSpeed, 0);
+
     //Player Dosen't go out of map
     if (player.x < 30) {
         player.x = 30;
     }
     else if (player.x > canvas.width - 30) {
         player.x = canvas.width - 30;
+    }
+    //Player dosen't go below ground
+    if (player.y > groundLevel) {
+        player.y = groundLevel;
+        player.verticalSpeed = 0;
     }
 }
 
@@ -256,6 +265,22 @@ function drawZombies() {
     if (!game.active) return
     ctx.fillStyle = "red"
 
+    //Spawn Zombies after Boxes Placed
+    if (boxes.length >= 5) {
+        if (frames % 300 == 0) {
+            let zombie = { x: undefined, y: groundLevel - player.width / 2, width: player.width, height: player.height, speed: 0.5, damage: 10, health: 30 }
+            let side = Math.random()
+            if (side > 0.5) {
+                zombie.x = 0
+            }
+            else {
+                zombie.x = canvas.width
+                zombie.speed = -zombie.speed
+            }
+            zombies.push(zombie)
+        }
+    }
+
     zombies.forEach((zombie) => {
         zombie.x += zombie.speed
         
@@ -286,8 +311,10 @@ function distance(x1, y1, x2, y2) {
 // Collision Mechs
 function collisionMechanics() {
     if (!game.active) return
-    //Between Player and Box (Need gande wale If Statements for accuracy)
-    boxes.forEach((box) => {
+
+    //Collision with Box and
+    boxes.forEach((box, indexBox) => {
+        //Between Player (Need gande wale If Statements for accuracy)
         //4 direction ko alag alag karna padega
         if (distance(player.x, player.y, box.x, box.y + tempBox.height / 2) < (player.height + tempBox.height) * 0.707) {
             //Player on top edge      
@@ -308,20 +335,16 @@ function collisionMechanics() {
                 player.y = box.y + tempBox.height + player.height / 2
             }
         }
-    })
 
-    //Between Box and Bullets
-    bullets.forEach((bullet, index) => {
-        boxes.forEach((box) => {
+        //Between Bullets
+        bullets.forEach((bullet, index) => {
             if (distance(bullet.x, bullet.y, box.x, box.y + tempBox.height / 2) < 70) {
                 bullets.splice(index, 1)
             }
         })
-    })
 
-    //Between Box and Zombie
-    zombies.forEach((zombie, indexZombie) => {
-        boxes.forEach((box, indexBox) => {
+        //Between Zombies 
+        zombies.forEach((zombie) => {
             if (Math.abs(zombie.x + zombie.width / 2 - box.x) < zombie.width / 2 + tempBox.width / 2 && box.y == groundLevel - tempBox.height + 30) {
                 if (zombie.speed > 0) {
                     zombie.x = box.x - tempBox.width / 2 - 40 - zombie.width
@@ -337,8 +360,11 @@ function collisionMechanics() {
                 }
             }
         })
+    })
 
-        //Between Zombie and Bullets
+    //Collision with Zombie and
+    zombies.forEach((zombie, indexZombie) => {
+        //Between Bullets
         bullets.forEach((bullet, indexBullet) => {
             if (distance(bullet.x, bullet.y, zombie.x + zombie.width / 2, zombie.y + zombie.height / 2) < 55) {
                 zombie.health -= bullet.damage
@@ -356,7 +382,7 @@ function collisionMechanics() {
             }
         })
 
-        //Between Player and Zombie
+        //Between Player
         if (distance(player.x, player.y, zombie.x + zombie.width / 2, zombie.y + zombie.height / 2) < (player.width + zombie.width) * 0.6) {
             player.health -= zombie.damage
             score += 10
@@ -368,7 +394,6 @@ function collisionMechanics() {
 let frames = 0
 //Main Update Function
 function update() {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //Score
@@ -377,38 +402,11 @@ function update() {
     ctx.fillText("Score: ", 20, 30)
     ctx.fillText(score, 85, 31)
 
-    // Update player position
-    player.x += player.speed;
-    player.verticalSpeed += gravity; //Gravity to Player's Vertical Speed
-    player.y = Math.max(player.y + player.verticalSpeed, 0);
-
-    //Player dosen't go below ground
-    if (player.y > groundLevel) {
-        player.y = groundLevel;
-        player.verticalSpeed = 0;
-    }
-
-    //Spawn Zombies after Boxes Placed
-    if (boxes.length >= 5) {
-        drawBullets();
-        if (frames % 300 == 0) {
-            let zombie = { x: undefined, y: groundLevel - player.width / 2, width: player.width, height: player.height, speed: 0.5, damage: 10, health: 30 }
-            let side = Math.random()
-            if (side > 0.5) {
-                zombie.x = 0
-            }
-            else {
-                zombie.x = canvas.width
-                zombie.speed = -zombie.speed
-            }
-            zombies.push(zombie)
-        }
-    }
-
     //Run all Functions
     collisionMechanics();
     drawBoxes();
     drawPlayer();
+    drawBullets();
     drawZombies();
     homeScreen();
 
