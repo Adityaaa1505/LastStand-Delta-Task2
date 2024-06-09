@@ -1,3 +1,4 @@
+//Made by Aditya Agrawal
 //Setting up Canvas
 const canvas = document.getElementById('gameCanvas');
 canvas.width = innerWidth
