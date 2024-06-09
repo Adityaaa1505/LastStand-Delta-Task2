@@ -5,13 +5,13 @@ canvas.height = innerHeight
 const ctx = canvas.getContext('2d');
 
 //Initializing some Constants
-const gravity = 0.2;
+let gravity = 0.2;
 const groundLevel = canvas.height - 80;
 var time = 0;
 let score = 0
 let highscore = 0
 
-game = {active: false, pause: false}
+game = { active: false }
 
 //Initializing Player
 const player = {
@@ -22,7 +22,8 @@ const player = {
     speed: 0,
     verticalSpeed: 0,
     health: 100,
-    opacity: 1
+    lastShootTime: 0,
+    shootRate: 300
 };
 
 //Initializing Bullets Array
@@ -40,6 +41,8 @@ const tempBox = {
 //Initializing Zombie Array
 let zombies = []
 
+//Initializing PowerUps
+powerUps = []
 
 let mouseX = 0;
 let mouseY = 0;
@@ -49,7 +52,7 @@ document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 document.addEventListener('mousemove', handleMouseMove);
 document.addEventListener('mousedown', handleMouseDown);
-    
+
 //Player Movement
 function handleKeyDown(event) {
     if (!game.active) return
@@ -65,20 +68,24 @@ function handleKeyDown(event) {
         case 'KeyD':
             player.speed = 7;
             break;
-    }
-    //Player shot some bullets
-    if (event.code == "Space") {
-        const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-        bullets.push({
-            x: player.x,
-            y: player.y,
-            angle: angle,
-            verticalSpeed: 0,
-            damage: 10
-        });
-    }
-    if (event.code == "KeyP"){
-        if (game.active) game.active = false
+        case 'Space':
+            //Bullet Spam Control
+            var now = Date.now();
+            if (now - player.lastShootTime < player.shootRate) return;
+            player.lastShootTime = now;
+
+            //Player shot bullets
+            const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
+            bullets.push({
+                x: player.x,
+                y: player.y,
+                angle: angle,
+                verticalSpeed: 0,
+                damage: 10
+            });
+            break;
+        case 'KeyP':
+            if (game.active) game.active = false
     }
 }
 
@@ -129,26 +136,26 @@ function homeScreen() {
     ctx.strokeStyle = "white"
     ctx.strokeRect(100, 600, canvas.width - 200, 90)
     ctx.fillText("Play", 680, 665)
-    ctx.font = "40px Ariel" 
+    ctx.font = "40px Ariel"
     ctx.fillText("Instructions:", 640, 250)
     ctx.font = "20px Ariel"
     ctx.fillText("W - Jump", 700, 300)
     ctx.fillText("A - Left", 700, 325)
     ctx.fillText("D - Right", 700, 350)
-    ctx.fillText("P - Pause", 700, 375)    
+    ctx.fillText("P - Pause", 700, 375)
     ctx.fillText("Space / Left Mouse - Shoot", 700, 400)
     ctx.fillText("You have 100 health. Zombies have 30 health. Boxes have 150 health.", 640, 450)
     ctx.fillText("Zombies do 10 damage to player and boxes. Bullets do 10 damage to", 640, 475)
     ctx.fillText("zombies. Place 5 boxes (when green) stratigically across the map to help ", 640, 500)
-    ctx.fillText("you fend off the zombies. Be careful, don't stand on a box for too long.", 640, 525)
+    ctx.fillText("you fend off the zombies. Be careful, don't stand on a box too long.", 640, 525)
     ctx.fillText("Best of Luck, Soldier", 640, 550)
-    ctx.fillText("Made with ❤️ by Aditya", 630, canvas.height-15)
+    ctx.fillText("Made with ❤️ by Aditya", 630, canvas.height - 15)
 
     //If Play Button Clicked
     document.addEventListener("mousedown", function () {
         if (100 < mouseX && mouseX < canvas.width - 200 && 600 < mouseY && mouseY < 690) {
             game.active = true
-        return
+            return
         }
     });
 }
@@ -290,10 +297,10 @@ function drawZombies() {
             zombies.push(zombie)
         }
     }
-
+    //Zombie Movement
     zombies.forEach((zombie) => {
         zombie.x += zombie.speed
-        
+
         //Zombie goes towards player
         if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) {
             zombie.speed = - zombie.speed
@@ -302,7 +309,7 @@ function drawZombies() {
             zombie.speed = - zombie.speed
         }
 
-        ctx.fillRect(zombie.x, zombie.y, zombie.width, zombie.height)
+        //Draw Zombie
         zombieImg = new Image();
         zombieImg.src = "assets/zombie.jpg"
         ctx.drawImage(zombieImg, zombie.x, zombie.y, zombie.width, zombie.height)
@@ -315,6 +322,67 @@ function drawZombies() {
         ctx.fillRect(zombie.x + zombie.width / 30 * zombie.health, zombie.y - 20, zombie.width / 30 * (30 - zombie.health), 5)
         1
     })
+}
+
+//Draw Power Ups
+function drawPowerUps() {
+    if (!game.active) return
+
+    //If Game Started?
+    if (boxes.length >= 5) {
+        //If to Spawn Power Up randomly every 1000 ticks?
+        if (frames % 1000 == 0) {
+            let spawnPowerUps = Math.random()
+            if (spawnPowerUps < 0.2) {
+                powerUp = {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * 200 + Math.random()*70,
+                    radius: 25,
+                    type: "playerImmunity"
+                }
+                powerUps.push(powerUp)
+
+                setTimeout(() => {
+                    powerUps.splice(0,1)
+                }, 5000);
+            }
+            else if (0.2 < spawnPowerUps && spawnPowerUps < 0.4) {
+                powerUp = {
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * 200 + Math.random()*70,
+                    radius: 25,
+                    type: "playerIncreaseShootRate"
+                }
+                powerUps.push(powerUp)
+
+                setTimeout(() => {
+                    powerUps.splice(0,1)
+                }, 5000);
+            }
+        }
+    }
+
+    //For Each Power Up
+    powerUps.forEach((powerUp) => {
+        //Determine which type
+        if (powerUp.type == "playerImmunity"){
+
+            //Draw
+            powerUpImmunity = new Image();
+            powerUpImmunity.src = "assets/playerImmunityPowerUp.png"
+            ctx.drawImage(powerUpImmunity, powerUp.x - powerUp.radius, powerUp.y - powerUp.radius)
+
+        }
+        else if (powerUp.type == "playerIncreaseShootRate"){
+
+            //Draw
+            powerUpShootRate= new Image();
+            powerUpShootRate.src = "assets/playerIncreaseShootRate.png"
+            ctx.drawImage(powerUpShootRate, powerUp.x - powerUp.radius, powerUp.y - powerUp.radius)
+            
+        }
+    })
+
 }
 
 // Distance Function
@@ -368,7 +436,7 @@ function collisionMechanics() {
                 }
 
                 box.health -= zombie.damage
-                if (box.health == 0) {
+                if (box.health <= 0) {
                     boxes.splice(indexBox, 1)
                     boxes.push(-100, -100, -1, -1)
                 }
@@ -401,7 +469,29 @@ function collisionMechanics() {
             player.health -= zombie.damage
             score += 10
             zombies.splice(indexZombie, 1)
+            console.log(player.health)
         }
+    })
+
+    //Collision with Power Ups and between Player
+    powerUps.forEach((powerUp, index) => {
+        if (distance(powerUp.x, powerUp.y, player.x, player.y) < (player.width/2 + powerUp.radius)){
+            //Do the Powerup
+            if (powerUp.type == "playerImmunity"){
+                player.health += 40
+                console.log(player.health)
+                if (player.health > 100) player.health = 100
+            }
+            else if (powerUp.type == "playerIncreaseShootRate"){
+                player.shootRate = 100
+                //Reset the Power Up
+                setTimeout(() => {
+                    player.shootRate = 300
+                }, 5000);
+            }
+            powerUps.splice(index, 1)
+        }
+
     })
 }
 
@@ -424,18 +514,19 @@ function update() {
     drawPlayer();
     drawBullets();
     drawZombies();
+    drawPowerUps();
     homeScreen();
 
     frames += 1
 
     //Lose Condition
-    if (player.health == 0) {
-        player.opactiy = 0
+    if (player.health <= 0) {
         boxes = []
         bullets = []
         zombies = []
+        powerUps = []
         player.health = 100
-        if (score>highscore) highscore = score
+        if (score > highscore) highscore = score
         score = 0
         game.active = false
     }
