@@ -563,7 +563,7 @@ function collisionMechanics() {
                 setTimeout(() => {
                     powerUpTaken = false
                     player.powerUpType = undefined
-                }, 1000);
+                }, 2000);
             }
 
             else if (powerUp.type == "playerIncreaseShootRate") {
