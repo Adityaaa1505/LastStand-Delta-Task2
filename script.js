@@ -11,6 +11,8 @@ const groundLevel = canvas.height - 80;
 var time = 0;
 let score = 0
 let highscore = 0
+let powerUpAudio = new Audio()
+powerUpAudio.src = "assets/powerUpPickUp.flac" 
 
 game = { active: false }
 
@@ -31,7 +33,7 @@ const player = {
 
 //Initializing Bullets Array
 let bullets = [];
-const bulletSpeed = 15;
+const bulletSpeed = 10;
 
 //Initializing Box Array
 let boxes = [];
@@ -332,7 +334,7 @@ function drawPowerUps() {
     //If Game Started?
     if (boxes.length >= 5) {
         //If to Spawn Power Up randomly every 1000 ticks?
-        if (frames % 500 == 0) {
+        if (frames % 1000 == 0) {
             let spawnPowerUps = Math.random()
             if (spawnPowerUps < 0.2) {
                 powerUp = {
@@ -345,7 +347,7 @@ function drawPowerUps() {
 
                 setTimeout(() => {
                     powerUps.splice(0, 1)
-                }, 5000);
+                }, 7000);
             }
             else if (0.2 < spawnPowerUps && spawnPowerUps < 0.4) {
                 powerUp = {
@@ -358,7 +360,7 @@ function drawPowerUps() {
 
                 setTimeout(() => {
                     powerUps.splice(0, 1)
-                }, 5000);
+                }, 7000);
             }
             else if (0.4 < spawnPowerUps && spawnPowerUps < 0.5) {
                 powerUp = {
@@ -371,7 +373,7 @@ function drawPowerUps() {
 
                 setTimeout(() => {
                     powerUps.splice(0, 1)
-                }, 5000);
+                }, 7000);
             }
         }
     }
@@ -521,6 +523,9 @@ function collisionMechanics() {
         if (distance(powerUp.x, powerUp.y, player.x, player.y) < (player.width / 2 + powerUp.radius)) {
             //Do the Powerup
             player.powerUpTaken = true
+
+            //Play Pickup Audio
+            powerUpAudio.play()
 
             if (powerUp.type == "playerImmunity") {
                 player.powerUpType = 2
