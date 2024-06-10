@@ -24,14 +24,14 @@ const player = {
     verticalSpeed: 0,
     health: 100,
     lastShootTime: 0,
-    shootRate: 300
-    // powerUpTaken: false,
-    // powerUpType: undefined
+    shootRate: 300,
+    powerUpTaken: false,
+    powerUpType: undefined
 };
 
 //Initializing Bullets Array
 let bullets = [];
-const bulletSpeed = 10;
+const bulletSpeed = 15;
 
 //Initializing Box Array
 let boxes = [];
@@ -296,7 +296,14 @@ function drawZombies() {
 
     //Spawn Zombies after Boxes Placed
     if (boxes.length >= 5) {
-        if (frames % 300 == 0) {
+        let zombieSpawnRate = 250
+        //Zombie Spawn Rate changes according to score
+        if (score % 40 == 0) {
+            zombieSpawnRate -= 50
+            if (zombieSpawnRate <= 0) zombieSpawnRate = 10
+        }
+        //Spawn Zombies
+        if (frames % zombieSpawnRate == 0) {
             let zombie = { x: undefined, y: groundLevel - player.width / 2, width: player.width, height: player.height, speed: 0.5, damage: 10, health: 30 }
             let side = Math.random()
             if (side > 0.5) {
@@ -343,7 +350,7 @@ function drawPowerUps() {
     //If Game Started?
     if (boxes.length >= 5) {
         //If to Spawn Power Up randomly every 1000 ticks?
-        if (frames % 1000 == 0) {
+        if (frames % 500 == 0) {
             let spawnPowerUps = Math.random()
             if (spawnPowerUps < 0.2) {
                 powerUp = {
@@ -390,8 +397,11 @@ function drawPowerUps() {
     //For Each Power Up
     powerUps.forEach((powerUp) => {
         //Determine which type
+        // ctx.fillStyle = "rgb(0, 255, 0)"
+        // ctx.beginPath();
+        // ctx.arc(powerUp.x, powerUp.y, 35, 0, Math.PI*2);
+        // ctx.fill();
         if (powerUp.type == "playerImmunity") {
-
             //Draw
             powerUpImmunity = new Image();
             powerUpImmunity.src = "assets/playerImmunityPowerUp.png"
@@ -399,7 +409,6 @@ function drawPowerUps() {
 
         }
         else if (powerUp.type == "playerIncreaseShootRate") {
-
             //Draw
             powerUpShootRate = new Image();
             powerUpShootRate.src = "assets/playerIncreaseShootRate.png"
@@ -408,7 +417,6 @@ function drawPowerUps() {
         }
 
         else if (powerUp.type == "playerJetpack") {
-
             //Draw
             powerUpJetpack = new Image();
             powerUpJetpack.src = "assets/playerJetpack.png"
@@ -418,39 +426,42 @@ function drawPowerUps() {
 
 }
 
+let row = 0
+let col = 0
+
 //Draw Power Up Animation
-// function drawPowerUpAnimation() {
-//     //Do the Animation
-//     powerUpAnimation = new Image();
-//     powerUpAnimation.src = "assets/animationSpriteSheet.png"
-//     console.log("Function Called")
-//     if (player.powerUpTaken) {
-//         let row = 0
-//         let col = 0
-//         if (player.powerUpType == "playerImmunity") {
-//             console.log("1 of them running")
-//             row = 2
-//             //player.x - player.width/2, player.y - player.height/2, player.width, player.height
-//             ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, 100, 100, player.width, player.height)
-//         }
-//         else if (player.powerUpType == "playerIncreaseShootRate") {
-//             console.log("1 of them running")
-//             row = 1
-//             ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)
-//         }
+function drawPowerUpAnimation() {
+    if (!player.powerUpTaken || !game.active) return
+    //Do the Animation
+        powerUpAnimation = new Image();
+        powerUpAnimation.src = "assets/animationSpriteSheet.png"
+    if (player.powerUpType == 2) {
+        row = 2
+        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 38, player.y - 40, 75, 75)
+            if (frames % 10 == 0) {
+                if (col<4) col ++
+                else col = 0
+            } 
+        }
 
-//         else if (player.powerUpType == "playerJetpack") {
-//             console.log("1 of them running")
-//             row = 0
-//             ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)
-//         }
+    else if (player.powerUpType == 1) {
+        row = 1
+        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 60, player.y - 60, 130, 130)
+        if (frames % 30 == 0){
+            if (col<4) col ++
+            else col = 0
+        }
+    }
 
-//         if (frames % 10 == 0) {
-//             col++
-//             if (col > 4) return
-//         }
-//     }
-// }
+    else if (player.powerUpType == "0") {
+        row = 0
+        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 40, player.y - 40, 80, 80)
+        if (frames % 30 == 0){
+            if (col<4) col ++
+            else col = 0
+        }
+    }
+}
 
 // Distance Function
 function distance(x1, y1, x2, y2) {
@@ -543,37 +554,41 @@ function collisionMechanics() {
     powerUps.forEach((powerUp, index) => {
         if (distance(powerUp.x, powerUp.y, player.x, player.y) < (player.width / 2 + powerUp.radius)) {
             //Do the Powerup
-            // player.powerUpTaken = true
-            // drawPowerUpAnimation()
+            player.powerUpTaken = true
 
             if (powerUp.type == "playerImmunity") {
+                player.powerUpType = 2
                 player.health += 40
-                player.powerUpType = "playerImmunity"
                 if (player.health > 100) player.health = 100
+                setTimeout(() => {
+                    powerUpTaken = false
+                    player.powerUpType = undefined
+                }, 1000);
             }
 
             else if (powerUp.type == "playerIncreaseShootRate") {
+                player.powerUpType = 1
                 player.shootRate = 100
-                player.powerUpType = "playerIncreaseShootRate"
                 //Reset the Power Up
                 setTimeout(() => {
                     player.shootRate = 300
+                    powerUpTaken = false
+                    player.powerUpType = undefined
                 }, 5000);
             }
 
             else if (powerUp.type == "playerJetpack") {
+                player.powerUpType = 0
                 gravity = 0
-                player.powerUpType = "playerJetpack"
                 //Reset the Power Up
                 setTimeout(() => {
                     gravity = 0.2
+                    powerUpTaken = false
+                    player.powerUpType = undefined
                 }, 10000);
             }
-            // powerUpType = undefined
-            // powerUpTaken = false
             powerUps.splice(index, 1)
         }
-
     })
 }
 
@@ -598,6 +613,7 @@ function update() {
     drawPowerUps();
     homeScreen();
     collisionMechanics();
+    drawPowerUpAnimation()
 
     frames += 1
 
