@@ -311,7 +311,7 @@ function drawZombies() {
         //Zombie goes towards player
         if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) zombie.speed = - zombie.speed1
         else if (zombie.speed < 0 && zombie.x + zombie.width / 2 < player.x) zombie.speed = - zombie.speed
-        
+
         //Draw Zombie
         zombieImg = new Image();
         zombieImg.src = "assets/zombie.jpg"
@@ -410,9 +410,17 @@ function drawPowerUpAnimation() {
     //Do the Animation
     powerUpAnimation = new Image();
     powerUpAnimation.src = "assets/animationSpriteSheet.png"
-    if (player.powerUpType == "0") {
+    if (player.powerUpType == 0) {
         row = 0
         ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 40, player.y - 40, 80, 80)
+        if (frames % 30 == 0) {
+            if (col < 4) col++
+            else col = 0
+        }
+    }
+    else if (player.powerUpType == 1) {
+        row = 1
+        ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 60, player.y - 60, 130, 130)
         if (frames % 30 == 0) {
             if (col < 4) col++
             else col = 0
@@ -422,14 +430,6 @@ function drawPowerUpAnimation() {
         row = 2
         ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 38, player.y - 40, 75, 75)
         if (frames % 10 == 0) {
-            if (col < 4) col++
-            else col = 0
-        }
-    }
-    else if (player.powerUpType == 1) {
-        row = 1
-        ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 60, player.y - 60, 130, 130)
-        if (frames % 30 == 0) {
             if (col < 4) col++
             else col = 0
         }
@@ -458,11 +458,11 @@ function collisionMechanics() {
             //Player on right edge
             if (player.x > box.x && player.x - player.width / 2 - tempBox.width / 2 - box.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2)
                 player.x = box.x + tempBox.width
-            
+
             //Player on left edge
             if (player.x < box.x && box.x - tempBox.width / 2 - player.width / 2 - player.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2)
                 player.x = box.x - tempBox.width;
-            
+
             // //Player on bottom edge
             if (player.y - player.height / 2 - tempBox.y - tempBox.height < 1 && box.x - tempBox.width / 2 - player.width / 2 < player.x && player.x < box.x + tempBox.width / 2 + player.width / 2)
                 player.y = box.y + tempBox.height + player.height / 2
@@ -583,6 +583,7 @@ function update() {
 
     frames += 1
     if (frames == 2000) frames = 0
+
 
     //Lose Condition
     if (player.health <= 0) {
