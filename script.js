@@ -65,7 +65,7 @@ function handleKeyDown(event) {
                 player.verticalSpeed = -10;
             }
             if (player.y < 100) {
-                player.y = 70;
+                player.y = 100;
             }
             break;
         case 'KeyS':
@@ -97,7 +97,6 @@ function handleKeyDown(event) {
             if (game.active) game.active = false
     }
 }
-
 function handleKeyUp(event) {
     if (!game.active) return
     switch (event.code) {
@@ -113,18 +112,14 @@ function handleKeyUp(event) {
             player.verticalSpeed = 0
     }
 }
-
 function handleMouseMove(event) {
     mouseX = event.clientX - canvas.getBoundingClientRect().left;
     mouseY = event.clientY - canvas.getBoundingClientRect().top;
 }
-
 function handleMouseDown(event) {
     if (!game.active) return
     //Adding Boxes if less than 5 and not above Player
-    if ((boxes.length < 5) && !((mouseX + tempBox.width > player.x) && (mouseX - tempBox.width < player.x))) {
-        boxes.push({ x: mouseX, y: mouseY, level: 0, health: 150 });
-    }
+    if ((boxes.length < 5) && !((mouseX + tempBox.width > player.x) && (mouseX - tempBox.width < player.x))) boxes.push({ x: mouseX, y: mouseY, level: 0, health: 150 });
     //Player shot some bullets
     else {
         const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
@@ -137,9 +132,11 @@ function handleMouseDown(event) {
         });
     }
 }
+
 //Draw Home Screen
 function homeScreen() {
     if (game.active) return
+
     ctx.fillStyle = "rgb(0, 0, 0, 0.7)"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.font = "100px Ariel"
@@ -177,6 +174,7 @@ function homeScreen() {
 //Draw Player and Gun
 function drawPlayer() {
     if (!game.active) return
+
     //Drawing Player 
     ctx.save();
     ctx.translate(player.x, player.y);
@@ -208,12 +206,8 @@ function drawPlayer() {
     player.y += player.verticalSpeed
 
     //Player Dosen't go out of map
-    if (player.x < 30) {
-        player.x = 30;
-    }
-    else if (player.x > canvas.width - 30) {
-        player.x = canvas.width - 30;
-    }
+    if (player.x < 30) player.x = 30;
+    else if (player.x > canvas.width - 30) player.x = canvas.width - 30;
     //Player dosen't go below ground
     if (player.y > groundLevel) {
         player.y = groundLevel;
@@ -235,9 +229,7 @@ function drawBullets() {
         ctx.fill();
 
         // Remove bullets that go out of bounds or hit the ground
-        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y > groundLevel + 30) {
-            bullets.splice(index, 1);
-        }
+        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y > groundLevel + 30) bullets.splice(index, 1);
     });
 }
 
@@ -260,9 +252,8 @@ function drawBoxes() {
         box.y += tempBox.speed
 
         //Collision between boxes and ground
-        if (box.y > groundLevel - tempBox.height) {
-            box.y = groundLevel - tempBox.height + 30;
-        }
+        if (box.y > groundLevel - tempBox.height) box.y = groundLevel - tempBox.height + 30;
+
         //Collision between boxes and boxes
         for (let i = 0; i < index; i++) {
             //If box on top of boxes[i] wala box
@@ -271,9 +262,7 @@ function drawBoxes() {
                 count.push(i)
                 box.level = boxes[count[count.length - 1]].level + 1;
                 //If box touching lower boxes[i]
-                if (box.y > boxes[count[count.length - 1]].y - tempBox.height) {
-                    box.y = boxes[count[count.length - 1]].y - tempBox.height;
-                }
+                if (box.y > boxes[count[count.length - 1]].y - tempBox.height) box.y = boxes[count[count.length - 1]].y - tempBox.height;
             }
         }
 
@@ -306,9 +295,7 @@ function drawZombies() {
         if (frames % zombieSpawnRate == 0) {
             let zombie = { x: undefined, y: groundLevel - player.width / 2, width: player.width, height: player.height, speed: 0.5, damage: 10, health: 30 }
             let side = Math.random()
-            if (side > 0.5) {
-                zombie.x = 0
-            }
+            if (side > 0.5) zombie.x = 0
             else {
                 zombie.x = canvas.width
                 zombie.speed = -zombie.speed
@@ -316,30 +303,25 @@ function drawZombies() {
             zombies.push(zombie)
         }
     }
+
     //Zombie Movement
     zombies.forEach((zombie) => {
         zombie.x += zombie.speed
 
         //Zombie goes towards player
-        if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) {
-            zombie.speed = - zombie.speed
-        }
-        else if (zombie.speed < 0 && zombie.x + zombie.width / 2 < player.x) {
-            zombie.speed = - zombie.speed
-        }
-
+        if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) zombie.speed = - zombie.speed1
+        else if (zombie.speed < 0 && zombie.x + zombie.width / 2 < player.x) zombie.speed = - zombie.speed
+        
         //Draw Zombie
         zombieImg = new Image();
         zombieImg.src = "assets/zombie.jpg"
         ctx.drawImage(zombieImg, zombie.x, zombie.y, zombie.width, zombie.height)
-
 
         //Draw Zombie Health Bar
         ctx.fillStyle = "rgb(0, 255, 0)"
         ctx.fillRect(zombie.x, zombie.y - 20, zombie.width / 30 * zombie.health, 5)
         ctx.fillStyle = "rgb(255, 0, 0)"
         ctx.fillRect(zombie.x + zombie.width / 30 * zombie.health, zombie.y - 20, zombie.width / 30 * (30 - zombie.health), 5)
-        1
     })
 }
 
@@ -396,26 +378,18 @@ function drawPowerUps() {
 
     //For Each Power Up
     powerUps.forEach((powerUp) => {
-        //Determine which type
-        // ctx.fillStyle = "rgb(0, 255, 0)"
-        // ctx.beginPath();
-        // ctx.arc(powerUp.x, powerUp.y, 35, 0, Math.PI*2);
-        // ctx.fill();
         if (powerUp.type == "playerImmunity") {
             //Draw
             powerUpImmunity = new Image();
             powerUpImmunity.src = "assets/playerImmunityPowerUp.png"
             ctx.drawImage(powerUpImmunity, powerUp.x - powerUp.radius, powerUp.y - powerUp.radius)
-
         }
         else if (powerUp.type == "playerIncreaseShootRate") {
             //Draw
             powerUpShootRate = new Image();
             powerUpShootRate.src = "assets/playerIncreaseShootRate.png"
             ctx.drawImage(powerUpShootRate, powerUp.x - powerUp.radius, powerUp.y - powerUp.radius)
-
         }
-
         else if (powerUp.type == "playerJetpack") {
             //Draw
             powerUpJetpack = new Image();
@@ -423,41 +397,40 @@ function drawPowerUps() {
             ctx.drawImage(powerUpJetpack, powerUp.x - powerUp.radius, powerUp.y - powerUp.radius)
         }
     })
-
 }
 
+//Variables for Sprtie Sheet
 let row = 0
 let col = 0
 
 //Draw Power Up Animation
 function drawPowerUpAnimation() {
     if (!player.powerUpTaken || !game.active) return
-    //Do the Animation
-        powerUpAnimation = new Image();
-        powerUpAnimation.src = "assets/animationSpriteSheet.png"
-    if (player.powerUpType == 2) {
-        row = 2
-        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 38, player.y - 40, 75, 75)
-            if (frames % 10 == 0) {
-                if (col<4) col ++
-                else col = 0
-            } 
-        }
 
-    else if (player.powerUpType == 1) {
-        row = 1
-        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 60, player.y - 60, 130, 130)
-        if (frames % 30 == 0){
-            if (col<4) col ++
+    //Do the Animation
+    powerUpAnimation = new Image();
+    powerUpAnimation.src = "assets/animationSpriteSheet.png"
+    if (player.powerUpType == "0") {
+        row = 0
+        ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 40, player.y - 40, 80, 80)
+        if (frames % 30 == 0) {
+            if (col < 4) col++
             else col = 0
         }
     }
-
-    else if (player.powerUpType == "0") {
-        row = 0
-        ctx.drawImage(powerUpAnimation, col*120, row*120, 120, 120, player.x - 40, player.y - 40, 80, 80)
-        if (frames % 30 == 0){
-            if (col<4) col ++
+    else if (player.powerUpType == 2) {
+        row = 2
+        ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 38, player.y - 40, 75, 75)
+        if (frames % 10 == 0) {
+            if (col < 4) col++
+            else col = 0
+        }
+    }
+    else if (player.powerUpType == 1) {
+        row = 1
+        ctx.drawImage(powerUpAnimation, col * 120, row * 120, 120, 120, player.x - 60, player.y - 60, 130, 130)
+        if (frames % 30 == 0) {
+            if (col < 4) col++
             else col = 0
         }
     }
@@ -483,35 +456,30 @@ function collisionMechanics() {
                 verticalSpeed = 0
             }
             //Player on right edge
-            if (player.x > box.x && player.x - player.width / 2 - tempBox.width / 2 - box.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2) {
+            if (player.x > box.x && player.x - player.width / 2 - tempBox.width / 2 - box.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2)
                 player.x = box.x + tempBox.width
-            }
+            
             //Player on left edge
-            if (player.x < box.x && box.x - tempBox.width / 2 - player.width / 2 - player.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2) {
+            if (player.x < box.x && box.x - tempBox.width / 2 - player.width / 2 - player.x < 1 && box.y - player.height / 2 < player.y && player.y < box.y + tempBox.height + player.height / 2)
                 player.x = box.x - tempBox.width;
-            }
+            
             // //Player on bottom edge
-            if (player.y - player.height / 2 - tempBox.y - tempBox.height < 1 && box.x - tempBox.width / 2 - player.width / 2 < player.x && player.x < box.x + tempBox.width / 2 + player.width / 2) {
+            if (player.y - player.height / 2 - tempBox.y - tempBox.height < 1 && box.x - tempBox.width / 2 - player.width / 2 < player.x && player.x < box.x + tempBox.width / 2 + player.width / 2)
                 player.y = box.y + tempBox.height + player.height / 2
-            }
         }
 
         //Between Bullets
         bullets.forEach((bullet, index) => {
-            if (distance(bullet.x, bullet.y, box.x, box.y + tempBox.height / 2) < 70) {
-                bullets.splice(index, 1)
-            }
+            if (distance(bullet.x, bullet.y, box.x, box.y + tempBox.height / 2) < 70) bullets.splice(index, 1)
         })
 
         //Between Zombies 
         zombies.forEach((zombie) => {
             if (Math.abs(zombie.x + zombie.width / 2 - box.x) < zombie.width / 2 + tempBox.width / 2 && box.y == groundLevel - tempBox.height + 30) {
-                if (zombie.speed > 0) {
+                if (zombie.speed > 0)
                     zombie.x = box.x - tempBox.width / 2 - 40 - zombie.width
-                }
-                if (zombie.speed < 0) {
+                if (zombie.speed < 0)
                     zombie.x = box.x + tempBox.width / 2 + 40
-                }
 
                 box.health -= zombie.damage
                 if (box.health <= 0) {
@@ -529,12 +497,10 @@ function collisionMechanics() {
             if (distance(bullet.x, bullet.y, zombie.x + zombie.width / 2, zombie.y + zombie.height / 2) < 55) {
                 zombie.health -= bullet.damage
                 bullets.splice(indexBullet)
-                if (zombie.speed > 0) {
+                if (zombie.speed > 0)
                     zombie.x = zombie.x - tempBox.width / 2 - 20 - zombie.width
-                }
-                if (zombie.speed < 0) {
+                else if (zombie.speed < 0)
                     zombie.x = zombie.x + tempBox.width / 2 + 20
-                }
             }
             if (zombie.health == 0) {
                 score += 10
@@ -574,7 +540,7 @@ function collisionMechanics() {
                     player.shootRate = 300
                     powerUpTaken = false
                     player.powerUpType = undefined
-                }, 5000);
+                }, 10000);
             }
 
             else if (powerUp.type == "playerJetpack") {
@@ -616,6 +582,7 @@ function update() {
     drawPowerUpAnimation()
 
     frames += 1
+    if (frames == 2000) frames = 0
 
     //Lose Condition
     if (player.health <= 0) {
@@ -631,3 +598,5 @@ function update() {
     requestAnimationFrame(update);
 }
 update();
+
+//Made by Aditya Agrawal
