@@ -66,8 +66,8 @@ function handleKeyDown(event) {
             if (player.y > 80) {
                 player.verticalSpeed = -10;
             }
-            if (player.y < 100) {
-                player.y = 100;
+            if (player.y < 0) {
+                player.y = 0;
             }
             break;
         case 'KeyS':
@@ -288,9 +288,9 @@ function drawZombies() {
     //Spawn Zombies after Boxes Placed
     if (boxes.length >= 5) {
         let zombieSpawnRate = 250
-        //Zombie Spawn Rate changes according to score
+        //Zombie Spawn Rate changes according to Score
         if (score % 40 == 0) {
-            zombieSpawnRate -= 50
+            zombieSpawnRate -= 10
             if (zombieSpawnRate <= 0) zombieSpawnRate = 10
         }
         //Spawn Zombies
@@ -311,7 +311,7 @@ function drawZombies() {
         zombie.x += zombie.speed
 
         //Zombie goes towards player
-        if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) zombie.speed = - zombie.speed1
+        if (zombie.speed > 0 && zombie.x + zombie.width / 2 > player.x) zombie.speed = - zombie.speed
         else if (zombie.speed < 0 && zombie.x + zombie.width / 2 < player.x) zombie.speed = - zombie.speed
 
         //Draw Zombie
@@ -512,6 +512,7 @@ function collisionMechanics() {
 
         //Between Player
         if (distance(player.x, player.y, zombie.x + zombie.width / 2, zombie.y + zombie.height / 2) < (player.width + zombie.width) * 0.6) {
+            console.log("Kill")
             player.health -= zombie.damage
             score += 10
             zombies.splice(indexZombie, 1)
